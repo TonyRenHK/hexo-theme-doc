@@ -1,33 +1,62 @@
 const React = require('react');
-const {SHOW_SEARCH_RESULTS, HIDE_SEARCH_RESULTS} = require('./actions');
-const {dispatch} = require('../utils');
+const { SHOW_SEARCH_RESULTS, HIDE_SEARCH_RESULTS } = require('./actions');
+const { dispatch } = require('../utils');
 
 class SearchForm extends React.Component {
 
-  constructor (props) {
+  constructor(props) {
     super(props);
   }
 
-  handleKeyUp (e) {
-    const query = (e.target.value || '').trim();
+  handleKeyUp(e) {
 
+    const query = (e.target.value || '').trim();
+    console.log('query:' + query);
     if (!query) {
       dispatch(HIDE_SEARCH_RESULTS);
       return;
     }
 
-    if (query.length < 3) { return; }
-
     const results = this.props.search(query);
+    console.log(results);
+    if (results.length > 0) {
+      console.log('enter');
+      dispatch(SHOW_SEARCH_RESULTS, { results, query });
+    }
+    else {
+      fetch('/lunr.json', { credentials: 'include' })
+        .then(function(res) {
+          return res.json();
+        })
+        .then(function(json) {
+          console.log('**store**');
+          console.log(json.store);
+          for (var key in json.store) {
+            if (json.store.hasOwnProperty(key)) {
+              console.log(key + " -> " + json.store[key]); //body path title
+              console.log(json.store[key].body.includes(query));
+              if (json.store[key].body.includes(query) || json.store[key].title.includes(query)) {
+                results.push(json.store[key]);
+              }
+            }
+          }
+          dispatch(SHOW_SEARCH_RESULTS, { results, query });
 
-    dispatch(SHOW_SEARCH_RESULTS, {results, query});
+        });
+
+    }
+
+
 
     if (typeof this.props.onSearch === 'function') {
       this.props.onSearch();
     }
+
+
+
   }
 
-  render () {
+  render() {
 
     if (!this.props.search) { return null; }
 
@@ -46,7 +75,7 @@ class SearchForm extends React.Component {
   }
 }
 
-function SearchResultsTitle ({results, query}) {
+function SearchResultsTitle({ results, query }) {
   return (
     <div>
       <h1 className="doc-search-results__title">
@@ -58,7 +87,7 @@ function SearchResultsTitle ({results, query}) {
   );
 }
 
-function SearchResultsList ({results}) {
+function SearchResultsList({ results }) {
   if (!results.length) {
     return null;
   }
@@ -79,7 +108,7 @@ function SearchResultsList ({results}) {
               {result.title}
             </a>
             <span className="doc-search-results__list__score-divider">|</span>
-            <span className="doc-search-results__list__score">score: {result.score.toFixed(2)}</span>
+            
             <p dangerouslySetInnerHTML={createMarkup(result.body)}></p>
           </li>
         );
@@ -88,4 +117,4 @@ function SearchResultsList ({results}) {
   );
 }
 
-module.exports = {SearchForm, SearchResultsTitle, SearchResultsList};
+module.exports = { SearchForm, SearchResultsTitle, SearchResultsList };

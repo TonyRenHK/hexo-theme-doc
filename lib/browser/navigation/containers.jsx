@@ -1,16 +1,16 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const $ = require('jquery');
-const {url_for, getTOCHeaders} = require('../utils');
-const {Sidebar, SidebarToggle, SidebarClose, Navbar, Logo} = require('./components.jsx');
-const {SearchForm} = require('../search/components.jsx');
+const { url_for, getTOCHeaders } = require('../utils');
+const { Sidebar, SidebarToggle, SidebarClose, Navbar, Logo } = require('./components.jsx');
+const { SearchForm } = require('../search/components.jsx');
 const searchLoad = require('../search/load');
 
 const SIDEBAR_IS_VISIBLE_CLASS = 'doc-sidebar--is-visible';
 const NAVIGATION_IS_COLLASPED_CLASS = 'doc-navigation--is-collapsed';
 
 class Navigation extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
 
     this.url_for = url_for(this.props);
@@ -23,7 +23,7 @@ class Navigation extends React.Component {
     };
   }
 
-  componentDidMount () {
+  componentDidMount() {
     const SmoothScroll = require('smooth-scroll');
     const $headers = getTOCHeaders();
     const tocItems = this.getTocItems($headers);
@@ -54,12 +54,12 @@ class Navigation extends React.Component {
     });
   }
 
-  getItems () {
-    const {page} = this.props;
-    const {navigation} = Object.assign({}, { navigation: {} }, this.props.data);
+  getItems() {
+    const { page } = this.props;
+    const { navigation } = Object.assign({}, { navigation: {} }, this.props.data);
     const items = navigation.main || [];
 
-    (function recurse (items, parent) {
+    (function recurse(items, parent) {
       items.forEach((item) => {
         // add parent methods
         item.parent = () => { return parent; };
@@ -71,7 +71,7 @@ class Navigation extends React.Component {
         // and traverse ancestors
         if (item.path === page.path) {
           item.isCurrent = true;
-          (function walk (p) {
+          (function walk(p) {
             if (p) {
               p.isCurrentAncestor = true;
             }
@@ -79,7 +79,8 @@ class Navigation extends React.Component {
               walk(p.parent());
             }
           })(item.parent());
-        } else {
+        }
+        else {
           item.isCurrent = false;
         }
 
@@ -92,8 +93,8 @@ class Navigation extends React.Component {
     return items;
   }
 
-  getTocItems ($headers) {
-    return $headers.map(function (i, h) {
+  getTocItems($headers) {
+    return $headers.map(function(i, h) {
       return {
         id: h.id,
         text: (h.title || h.textContent),
@@ -102,8 +103,8 @@ class Navigation extends React.Component {
     });
   }
 
-  addAnchorToHeaders ($headers) {
-    $headers.each(function makeHeaderLinkable (i, h) {
+  addAnchorToHeaders($headers) {
+    $headers.each(function makeHeaderLinkable(i, h) {
       const span = document.createElement('span');
       h.insertBefore(span, h.firstChild);
 
@@ -121,8 +122,8 @@ class Navigation extends React.Component {
 
   // Listen to "DOMContentLoaded|scroll|resize" events and determines
   // which header is currently "visible"
-  listenVisibleHeaderChanges ($headers) {
-    const offsetThreshold =  120;
+  listenVisibleHeaderChanges($headers) {
+    const offsetThreshold = 120;
     let prev, next;
 
     const listener = () => {
@@ -137,7 +138,8 @@ class Navigation extends React.Component {
           if (link.offsetTop - offsetThreshold > top) {
             if (!last) last = link;
             break;
-          } else {
+          }
+          else {
             last = link;
           }
         }
@@ -165,41 +167,42 @@ class Navigation extends React.Component {
     return listener;
   }
 
-  loadSearchIndex () {
+  loadSearchIndex() {
     const route = this.props.config.theme_config.search.route || '/lunr.json';
+    console.log('route:' + route);
     searchLoad(this.url_for(route))
       .then((search) => this.setState({ search }));
   }
 
-  listenContentClick () {
+  listenContentClick() {
     this.$content.on('click', this.onContentClick.bind(this));
   }
 
-  onContentClick () {
-    if ( this.$body.hasClass(SIDEBAR_IS_VISIBLE_CLASS) ) {
+  onContentClick() {
+    if (this.$body.hasClass(SIDEBAR_IS_VISIBLE_CLASS)) {
       this.toggleSidebar();
     }
   }
 
-  collapseSidebar () {
+  collapseSidebar() {
     this.$body.addClass(NAVIGATION_IS_COLLASPED_CLASS);
   }
 
-  uncollapseSidebar () {
+  uncollapseSidebar() {
     this.$body.removeClass(NAVIGATION_IS_COLLASPED_CLASS);
     this.$searchFormInput().focus();
   }
 
-  toggleSidebar () {
+  toggleSidebar() {
     this.$body.toggleClass(SIDEBAR_IS_VISIBLE_CLASS);
   }
 
-  hideSidebar () {
+  hideSidebar() {
     this.$body.removeClass(SIDEBAR_IS_VISIBLE_CLASS);
   }
 
-  render () {
-    const {navigation} = Object.assign({}, { navigation: {} }, this.props.data);
+  render() {
+    const { navigation } = Object.assign({}, { navigation: {} }, this.props.data);
     return (
       <div className="doc-navigation">
         <Navbar
@@ -235,4 +238,4 @@ class Navigation extends React.Component {
   }
 }
 
-module.exports = {Navigation, SIDEBAR_IS_VISIBLE_CLASS, NAVIGATION_IS_COLLASPED_CLASS};
+module.exports = { Navigation, SIDEBAR_IS_VISIBLE_CLASS, NAVIGATION_IS_COLLASPED_CLASS };
