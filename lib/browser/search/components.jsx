@@ -11,16 +11,16 @@ class SearchForm extends React.Component {
   handleKeyUp(e) {
 
     const query = (e.target.value || '').trim();
-    console.log('query:' + query);
+    //console.log('query:' + query);
     if (!query) {
       dispatch(HIDE_SEARCH_RESULTS);
       return;
     }
 
     const results = this.props.search(query);
-    console.log(results);
+    //console.log(results);
     if (results.length > 0) {
-      console.log('enter');
+      //console.log('enter');
       dispatch(SHOW_SEARCH_RESULTS, { results, query });
     }
     else {
@@ -29,14 +29,27 @@ class SearchForm extends React.Component {
           return res.json();
         })
         .then(function(json) {
-          console.log('**store**');
-          console.log(json.store);
+          //console.log('**store**');
+          //console.log(json.store);
           for (var key in json.store) {
             if (json.store.hasOwnProperty(key)) {
-              console.log(key + " -> " + json.store[key]); //body path title
-              console.log(json.store[key].body.includes(query));
-              if (json.store[key].body.includes(query) || json.store[key].title.includes(query)) {
-                results.push(json.store[key]);
+              //console.log(key + " -> " + json.store[key]); //body path title
+              //console.log(json.store[key].body.includes(query));
+              if (json.store[key].body.includes(query)) {
+                var displayContent = {
+                  body: generateBody(json.store[key].body, query),
+                  path: json.store[key].path,
+                  title: json.store[key].title
+                };
+                results.push(displayContent);
+              }
+              else if (json.store[key].title.includes(query)) {
+                var displayContent = {
+                  body: generateBody(json.store[key].body, query),
+                  path: json.store[key].path,
+                  title: json.store[key].title
+                };
+                results.push(displayContent);
               }
             }
           }
@@ -75,6 +88,32 @@ class SearchForm extends React.Component {
   }
 }
 
+
+function generateBody(body, query) {
+  var indexNumber = body.indexOf(query);
+  var bodyLength = body.length;
+  var returnBody = '';
+  var frontCut = 10;
+  var bodyCut = 100;
+
+  if (indexNumber < frontCut && bodyLength > bodyCut) {
+    returnBody = body.substring(0, bodyCut) + '。。。';
+  }
+  else if (indexNumber < frontCut && bodyLength < bodyCut) {
+    returnBody = body.substring(0, bodyLength);
+  }
+  else if (indexNumber > frontCut && bodyLength > (bodyCut + indexNumber)) {
+    returnBody = '。。。' + body.substring(indexNumber, bodyCut + indexNumber) + '。。。';
+  }
+  else if (indexNumber > frontCut && bodyLength < (bodyCut + indexNumber)) {
+    returnBody = '。。。' + body.substring(indexNumber, bodyLength);
+  }
+  console.log(returnBody);
+  return returnBody;
+}
+
+
+
 function SearchResultsTitle({ results, query }) {
   return (
     <div>
@@ -107,8 +146,6 @@ function SearchResultsList({ results }) {
               onClick={handleSearchResultLinkClick}>
               {result.title}
             </a>
-            <span className="doc-search-results__list__score-divider">|</span>
-            
             <p dangerouslySetInnerHTML={createMarkup(result.body)}></p>
           </li>
         );
