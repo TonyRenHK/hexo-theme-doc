@@ -18,9 +18,7 @@ class SearchForm extends React.Component {
     }
 
     const results = this.props.search(query);
-    //console.log(results);
     if (results.length > 0) {
-      //console.log('enter');
       dispatch(SHOW_SEARCH_RESULTS, { results, query });
     }
     else {
@@ -103,11 +101,15 @@ function generateBody(body, query) {
     returnBody = body.substring(0, bodyLength);
   }
   else if (indexNumber > frontCut && bodyLength > (bodyCut + indexNumber)) {
-    returnBody = '。。。' + body.substring(indexNumber, bodyCut + indexNumber) + '。。。';
+    returnBody = '。。。' + body.substring(indexNumber - frontCut, bodyCut + indexNumber) + '。。。';
   }
   else if (indexNumber > frontCut && bodyLength < (bodyCut + indexNumber)) {
-    returnBody = '。。。' + body.substring(indexNumber, bodyLength);
+    returnBody = '。。。' + body.substring(indexNumber - frontCut, bodyLength);
   }
+  //add highlight 
+
+  returnBody = returnBody.replace(new RegExp(query, 'g'), '<span style="font-weight: bold;">' + query + '</span>');
+  //<span class="doc-highlight">contact</span>
   console.log(returnBody);
   return returnBody;
 }
@@ -118,10 +120,10 @@ function SearchResultsTitle({ results, query }) {
   return (
     <div>
       <h1 className="doc-search-results__title">
-        { results.length ? results.length : 'No' } results for <span className="doc-search-results__title__query">"{query}"</span>
+        搜索 <span className="doc-search-results__title__query">"{query}"</span>，{ results.length ? results.length+'个' : '没有' } 结果 ：
       </h1>
 
-      { !results.length ? <p>There are no results for "{query}". Why not <strong>try typing another keyword?</strong></p> : null }
+      { !results.length ? <p>系统未能搜索 "{query}"到结果.  <strong>试试其他关键字？</strong></p> : null }
     </div>
   );
 }
