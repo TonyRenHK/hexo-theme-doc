@@ -22,7 +22,7 @@ class SearchForm extends React.Component {
       dispatch(SHOW_SEARCH_RESULTS, { results, query });
     }
     else {
-      fetch('/lunr.json', { credentials: 'include' })
+      fetch('/helpCN/lunr.json', { credentials: 'include' })
         .then(function(res) {
           return res.json();
         })
@@ -30,8 +30,7 @@ class SearchForm extends React.Component {
           //console.log('**store**');
           //console.log(json.store);
           for (var key in json.store) {
-            if (json.store.hasOwnProperty(key)) {
-              //console.log(key + " -> " + json.store[key]); //body path title
+            if (json.store.hasOwnProperty(key)) { //console.log(key + " -> " + json.store[key]); //body path title
               //console.log(json.store[key].body.includes(query));
               if (json.store[key].body.includes(query)) {
                 var displayContent = {
@@ -78,7 +77,7 @@ class SearchForm extends React.Component {
           placeholder="Search..."
           onKeyUp={this.handleKeyUp.bind(this)}
           autoFocus={this.props.autoFocus} />
-        <button className="dc-btn dc-search-form__btn doc-search-form__btn" aria-label="Search">
+        <button className="dc-btn dc-search-form__btn doc-search-form__btn" aria-label="搜索 ">
           <i className="dc-icon dc-icon--search"></i>
         </button>
       </div>
@@ -110,7 +109,6 @@ function generateBody(body, query) {
 
   returnBody = returnBody.replace(new RegExp(query, 'g'), '<span style="font-weight: bold;">' + query + '</span>');
   //<span class="doc-highlight">contact</span>
-  console.log(returnBody);
   return returnBody;
 }
 
